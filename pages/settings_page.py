@@ -20,7 +20,7 @@ class SettingsPage(BasePage):
         title = BodyLabel("地平线6刷刷乐")
         title.setStyleSheet("font-size: 14px; font-weight: bold;")
         left_info.addWidget(title)
-        version = BodyLabel("版本：0.1.0")
+        version = BodyLabel("版本：0.3.0")
         left_info.addWidget(version)
         about_layout.addLayout(left_info)
 
