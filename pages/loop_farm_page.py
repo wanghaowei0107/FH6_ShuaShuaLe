@@ -156,7 +156,7 @@ class LoopFarmPage(BasePage):
 
             if idx < len(card_defs) - 1:
                 spacer = QWidget()
-                spacer.setFixedWidth(20)
+                spacer.setFixedWidth(10)
                 flow_layout.addWidget(spacer)
                 flow_layout.addStretch()
 

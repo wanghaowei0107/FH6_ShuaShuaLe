@@ -16,7 +16,7 @@ class MainWindow(FluentWindow):
         self.app = app
         self.pages = {}
         self.setWindowTitle("FH6_刷刷乐")
-        self.resize(1000, 800)
+        self.resize(1200, 700)
 
         # 侧边栏宽度与折叠
         self.navigationInterface.setExpandWidth(150)
