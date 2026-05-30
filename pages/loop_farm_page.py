@@ -125,7 +125,7 @@ class LoopFarmPage(BasePage):
             ("return", "返回居所", [("通用延迟", "200", "ms")], None, True),
             ("wheelspin", "刷超级抽奖", [
                 ("通用延迟", "200", "ms"),
-                ("循环次数", "99", "")
+                ("循环次数", "30", "")
             ], "wheelspin", True),
             ("delete_car", "删除车辆", [("通用延迟", "200", "ms")], "delete_car", True),
         ]
@@ -213,7 +213,7 @@ class LoopFarmPage(BasePage):
         status_row.addStretch()
 
         self.total_loops_edit = LineEdit()
-        self.total_loops_edit.setText("3")
+        self.total_loops_edit.setText("1")
         self.total_loops_edit.setFixedWidth(60)
         status_row.addWidget(BodyLabel("总循环次数"))
         status_row.addWidget(self.total_loops_edit)

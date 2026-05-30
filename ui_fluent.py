@@ -15,7 +15,7 @@ class MainWindow(FluentWindow):
         super().__init__()
         self.app = app
         self.pages = {}
-        self.setWindowTitle("FH6 刷刷乐")
+        self.setWindowTitle("FH6_刷刷乐")
         self.resize(1000, 800)
 
         # 侧边栏宽度与折叠
