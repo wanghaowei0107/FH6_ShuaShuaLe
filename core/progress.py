@@ -1,6 +1,8 @@
 import configparser
 import os
 import threading
+from utils import resource_path
+PROGRESS_FILE = resource_path("config/progress.ini")
 
 PROGRESS_FILE = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
                              "config", "progress.ini")

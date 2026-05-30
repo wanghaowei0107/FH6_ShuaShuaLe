@@ -7,10 +7,12 @@ import configparser
 import os
 import time
 import threading
+from utils import resource_path
+import ctypes
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
-SETTINGS_FILE = os.path.join(PROJECT_ROOT, "config", "settings.ini")
+SETTINGS_FILE = resource_path("config/settings.ini")
 SAVE_DIR = os.path.join(PROJECT_ROOT, "debug_screenshots")
 TARGET_W, TARGET_H = 1280, 720
 
@@ -54,20 +56,76 @@ def get_client_offset(hwnd):
     return ox, oy, cw, ch
 
 def set_window_client_size(hwnd, target_w, target_h):
+    """强制设置窗口客户区为 target_w x target_h，兼容多显示器不同 DPI"""
+    import ctypes
+    from ctypes import wintypes
+
+    # 启用每监视器 DPI 感知
+    ctypes.windll.shcore.SetProcessDpiAwareness(2)
+
+    # 确保窗口还原
     win32gui.ShowWindow(hwnd, win32con.SW_RESTORE)
     time.sleep(0.2)
-    window_rect = win32gui.GetWindowRect(hwnd)
-    client_rect = win32gui.GetClientRect(hwnd)
-    border_w = (window_rect[2] - window_rect[0]) - client_rect[2]
-    border_h = (window_rect[3] - window_rect[1]) - client_rect[3]
-    new_ext_w = target_w + border_w
-    new_ext_h = target_h + border_h
-    win32gui.SetWindowPos(
-        hwnd, None,
-        0, 0, new_ext_w, new_ext_h,
-        win32con.SWP_NOMOVE | win32con.SWP_NOZORDER
-    )
-    time.sleep(0.3)
+
+    # 获取窗口样式
+    style = win32gui.GetWindowLong(hwnd, win32con.GWL_STYLE)
+    ex_style = win32gui.GetWindowLong(hwnd, win32con.GWL_EXSTYLE)
+
+    # 获取窗口所在屏幕的 DPI
+    monitor = ctypes.windll.user32.MonitorFromWindow(hwnd, 2)
+    dpi_x = wintypes.UINT()
+    dpi_y = wintypes.UINT()
+    ctypes.windll.shcore.GetDpiForMonitor(monitor, 0, ctypes.byref(dpi_x), ctypes.byref(dpi_y))
+
+    class RECT(ctypes.Structure):
+        _fields_ = [
+            ("left", ctypes.c_long),
+            ("top", ctypes.c_long),
+            ("right", ctypes.c_long),
+            ("bottom", ctypes.c_long),
+        ]
+
+    max_attempts = 5
+    for attempt in range(max_attempts):
+        # 获取当前客户区大小
+        client_rect = win32gui.GetClientRect(hwnd)
+        cur_w = client_rect[2] - client_rect[0]
+        cur_h = client_rect[3] - client_rect[1]
+
+        # 如果已经精确匹配，直接返回
+        if cur_w == target_w and cur_h == target_h:
+            return
+
+        # 计算所需的外部尺寸
+        desired = RECT(0, 0, target_w, target_h)
+        ctypes.windll.user32.AdjustWindowRectExForDpi(
+            ctypes.byref(desired), style, False, ex_style, dpi_x
+        )
+        outer_w = desired.right - desired.left
+        outer_h = desired.bottom - desired.top
+
+        # 如果不是第一次尝试，根据上次偏差进行补偿
+        if attempt > 0:
+            delta_w = target_w - cur_w
+            delta_h = target_h - cur_h
+            # 获取当前窗口外部尺寸
+            win_rect = win32gui.GetWindowRect(hwnd)
+            outer_w = (win_rect[2] - win_rect[0]) + delta_w
+            outer_h = (win_rect[3] - win_rect[1]) + delta_h
+
+        # 设置窗口大小（保持当前位置）
+        cur_rect = win32gui.GetWindowRect(hwnd)
+        win32gui.SetWindowPos(
+            hwnd, None,
+            cur_rect[0], cur_rect[1],
+            outer_w, outer_h,
+            win32con.SWP_NOZORDER | win32con.SWP_NOACTIVATE
+        )
+        time.sleep(0.2)
+
+    # 最终确认
+    final_rect = win32gui.GetClientRect(hwnd)
+    print(f"校准后客户区大小：{final_rect[2]}x{final_rect[3]}")
 
 def start_capture(hwnd):
     return windows_capture.WindowsCapture(

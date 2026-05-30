@@ -1,4 +1,4 @@
-import win32gui
+from win32 import win32gui
 
 def find_window(title_substring):
     """查找标题包含给定子串的窗口，返回句柄或 None"""

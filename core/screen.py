@@ -7,12 +7,14 @@ import configparser
 import os
 import threading
 from datetime import datetime
+from utils import resource_path
+from core.stopper import StoppableSleep
 
 # ---------- 基础路径（修复路径安全问题）----------
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(BASE_DIR)
 IMAGES_DIR = os.path.join(PROJECT_ROOT, "images")
-CONFIG_FILE = os.path.join(PROJECT_ROOT, "config", "settings.ini")
+CONFIG_FILE = resource_path("config/settings.ini")
 DEBUG_DIR = os.path.join(PROJECT_ROOT, "debug_screenshots")
 
 # ---------- 调试设置（关闭自动截图，需要排查时改为 True）----------
@@ -135,11 +137,17 @@ def match_template(screenshot, template_path, threshold=0.8):
     return None
 
 # ---------- 循环等待特定图像 ----------
-def wait_for_image(hwnd, template_name, timeout=10, check_interval=0.5, threshold=0.8):
+def wait_for_image(hwnd, template_name, timeout=10, check_interval=0.5, threshold=0.8, stop_event=None):
     template_path = os.path.join(IMAGES_DIR, template_name)
     start = time.time()
     attempt = 0
+    stoppable = StoppableSleep(stop_event) if stop_event else None
+
     while time.time() - start < timeout:
+        # 如果传入了停止事件，优先检查是否被要求停止
+        if stop_event and stop_event.is_set():
+            return False
+
         attempt += 1
         debug_log(f"检测 #{attempt}, 模板: {template_name}")
         screenshot = capture_window(hwnd)
@@ -151,6 +159,14 @@ def wait_for_image(hwnd, template_name, timeout=10, check_interval=0.5, threshol
         if match_template(screenshot, template_path, threshold):
             debug_log("匹配成功！")
             return True
-        time.sleep(check_interval)
+
+        # 可中断的睡眠
+        if stoppable:
+            if stoppable.sleep(check_interval):
+                return False
+        else:
+            # 普通小段睡眠（无 stop_event 时使用）
+            for _ in range(int(check_interval / 0.1)):
+                time.sleep(0.1)
     debug_log(f"超时未检测到 {template_name}")
     return False
