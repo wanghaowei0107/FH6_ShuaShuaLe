@@ -81,5 +81,5 @@
 
 1. **克隆仓库**
 ```bash
-git clone https://github.com/[你的用户名]/FH6_ShuaShuaLe.git
+git clone https://github.com/Prlock4367/FH6_ShuaShuaLe.git
 cd FH6_ShuaShuaLe
