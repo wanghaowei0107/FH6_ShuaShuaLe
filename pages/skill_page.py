@@ -81,6 +81,7 @@ class SkillPage(BasePage):
 
         self.stop_btn.setEnabled(False)
 
+
     def get_data(self):
         return {
             "loops": int(self.loops_edit.text()),

@@ -2,7 +2,6 @@ import sys, os, threading, logging, ctypes
 from PySide6.QtWidgets import QApplication
 from PySide6.QtCore import QTimer
 
-ctypes.windll.shcore.SetProcessDpiAwareness(1)
 
 logger = logging.getLogger("FH6_ShuaShuaLe")
 logger.setLevel(logging.DEBUG)
@@ -48,6 +47,21 @@ class App:
 
         self.ui = MainWindow(self)
         self.ui.show()
+
+        # 控制台输出环境检测（仅提示，不弹窗）
+        ver = sys.getwindowsversion()
+        if ver.build < 18362:
+            print(
+                f"[FH6] 提示: Windows 版本 {ver.major}.{ver.minor}.{ver.build} 低于 1903 (build 18362)，图像识别可能失败")
+
+        try:
+            import winreg
+            key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE,
+                                 r"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64")
+            winreg.CloseKey(key)
+        except:
+            print("[FH6] 提示: 未检测到 VC++ 2015-2022 Redistributable (x64)")
+            print("      下载地址: https://aka.ms/vs/17/release/vc_redist.x64.exe")
 
         self.monitor_timer = None
 

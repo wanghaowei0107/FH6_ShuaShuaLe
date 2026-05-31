@@ -127,7 +127,7 @@ class LoopFarmPage(BasePage):
                 ("通用延迟", "200", "ms"),
                 ("循环次数", "30", "")
             ], "wheelspin", True),
-            ("delete_car", "删除车辆", [("通用延迟", "200", "ms")], "delete_car", True),
+            ("delete_car", "删除车辆", [("通用延迟", "200", "ms"), ("循环次数", "30", "")], "delete_car", True),
         ]
 
         flow_widget = QWidget()

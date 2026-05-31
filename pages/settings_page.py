@@ -20,7 +20,7 @@ class SettingsPage(BasePage):
         title = BodyLabel("地平线6刷刷乐")
         title.setStyleSheet("font-size: 14px; font-weight: bold;")
         left_info.addWidget(title)
-        version = BodyLabel("版本：0.3.0")
+        version = BodyLabel("版本：0.3.1")
         left_info.addWidget(version)
         about_layout.addLayout(left_info)
 
@@ -42,7 +42,7 @@ class SettingsPage(BasePage):
         btn_xiaoheihe.setIconSize(QSize(14, 14))
         btn_xiaoheihe.setMinimumHeight(32)
         btn_xiaoheihe.setStyleSheet("QPushButton { padding: 5px 8px; }")
-        btn_xiaoheihe.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://你的小黑盒链接")))
+        btn_xiaoheihe.clicked.connect(lambda: QDesktopServices.openUrl(QUrl("https://www.xiaoheihe.cn/app/bbs/link/182396412")))
         about_layout.addWidget(btn_xiaoheihe)
 
         layout.addWidget(about_card)

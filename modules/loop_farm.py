@@ -182,6 +182,10 @@ def step_delete_car(hwnd, stop_event, loops, base_delay=0.2):
 
         if not car_found:
             print("错误：20次尝试后仍未找到目标车辆，删除流程终止。")
+            # 连按两次 ESC 确保退出车辆界面并回到居所主菜单
+            if stoppable.sleep(0.8 + base_delay): return False
+            press(hwnd, 'escape')
+            if stoppable.sleep(base_delay): return False
             release_all(hwnd)
             return False
 
