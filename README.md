@@ -40,7 +40,6 @@
 | OpenCV | 图像识别与模板匹配 |
 | windows-capture | 高性能窗口截图（WGC） |
 | pywin32 | Windows API，后台按键 |
-| threading + StoppableSleep | 可中断异步任务 |
 
 ## 📦 快速开始
 
