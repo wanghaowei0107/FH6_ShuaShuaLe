@@ -1,43 +1,54 @@
-🏎️ FH6_ShuaShuaLe地平线6刷刷乐
-<p align="center"> <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python"> <img src="https://img.shields.io/badge/PySide6-6.11.1-brightgreen.svg" alt="PySide6"> <img src="https://img.shields.io/badge/OpenCV-4.13.0.92-blue.svg" alt="OpenCV"> <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License"> <img src="https://img.shields.io/badge/version-0.4.2-red.svg" alt="Version"> </p><h3 align="center">《极限竞速：地平线 6》自动化辅助工具</h3><p align="center"> 刷技术点 · 超级抽奖 · 综合循环刷 · 送外卖 · 刷劲敌 · 线上挂机 · 遥测监控 </p>
-✨ 功能一览
-🎯 刷技术点 - 图像识别/纯按键双模式，自动重开
+🏎️ FH6 刷刷乐
 
-🎰 刷超级抽奖 - 完整买车抽奖流程，失败即停
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python">
+  <img src="https://img.shields.io/badge/PySide6-6.11.1-brightgreen.svg" alt="PySide6">
+  <img src="https://img.shields.io/badge/OpenCV-4.13.0.92-blue.svg" alt="OpenCV">
+  <img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License">
+  <img src="https://img.shields.io/badge/version-0.4.2-red.svg" alt="Version">
+</p>
 
-🔄 综合循环刷 - 步骤串联，独立参数，实时高亮
+<h3 align="center">《极限竞速：地平线 6》自动化辅助工具</h3>
 
-🍔 送外卖 - 遥测模式（推荐）/图像识别/纯按键
+<p align="center">
+  刷技术点 · 超级抽奖 · 综合循环刷 · 送外卖 · 刷劲敌 · 线上挂机 · 遥测监控
+</p>
 
-🏁 刷劲敌 - 按住W + 定时Enter
+## ✨ 功能一览
 
-🌐 线上挂机 - 未完成和测试待更新
+- 🎯 **刷技术点** - 图像识别/纯按键双模式，自动重开
+- 🎰 **刷超级抽奖** - 完整买车抽奖流程，失败即停
+- 🔄 **综合循环刷** - 步骤串联，独立参数，实时高亮
+- 🍔 **送外卖** - 遥测模式（推荐）/图像识别/纯按键
+- 🏁 **刷劲敌** - 按住W + 定时Enter
+- 🌐 **线上挂机** - 按住W + 定时D + Enter
+- 📊 **遥测监控** - UDP实时显示80+数据字段
+- 🔧 **画面校准** - 偏移微调，强制1280x720
+- 💾 **进度持久化** - 自动保存，一键重置
+- 🎨 **Fluent Design界面** - 浅色/深色主题
 
-📊 遥测监控 - UDP实时显示80+数据字段
+> 📖 **详细操作步骤、蓝图代码、车辆调教、游戏内设置请查看 [小黑盒教程帖](https://www.xiaoheihe.cn/app/bbs/link/182618437)**
 
-🔧 画面校准 - 偏移微调，强制1280x720
+## 🛠️ 技术栈
 
-💾 进度持久化 - 自动保存，一键重置
+| 技术 | 用途 |
+|------|------|
+| Python 3.11+ | 主体语言 |
+| PySide6 | GUI框架 |
+| PySide6-Fluent-Widgets | Fluent Design组件，Windows 11风格 |
+| OpenCV | 图像识别与模板匹配 |
+| windows-capture | 高性能窗口截图（WGC） |
+| pywin32 | Windows API，后台按键 |
+| threading + StoppableSleep | 可中断异步任务 |
 
-🎨 Fluent Design界面 - 浅色/深色主题
+## 📦 快速开始
 
-📖 详细操作步骤、蓝图代码、车辆调教、游戏内设置请查看 小黑盒教程帖
-
-🛠️ 技术栈
-技术	用途
-Python 3.11+	主体语言
-PySide6	GUI框架
-PySide6-Fluent-Widgets	Fluent Design组件，Windows 11风格
-OpenCV	图像识别与模板匹配
-windows-capture	高性能窗口截图（WGC）
-pywin32	Windows API，后台按键
-threading + StoppableSleep	可中断异步任务
-📦 快速开始
-bash
+```bash
 git clone https://github.com/Prlock4367/FH6_ShuaShuaLe.git
 cd FH6_ShuaShuaLe
 pip install -r requirements.txt
 python main.py
+
 环境要求
 Windows 10/11（建议1903+）
 
@@ -80,4 +91,4 @@ MIT © Prlock
 ⚠️ 免责声明
 本工具为个人开发，与《地平线6》官方无关。仅模拟键盘操作，不修改内存。使用第三方工具存在账号风险，请自行判断承担后果。仅供学习交流，勿用于商业或破坏公平环境。
 
-<p align="center">Made with ❤️ by Prlock</p>
+<p align="center">Made with ❤️ by Prlock</p> ```
