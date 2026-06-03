@@ -48,6 +48,7 @@ git clone https://github.com/Prlock4367/FH6_ShuaShuaLe.git
 cd FH6_ShuaShuaLe
 pip install -r requirements.txt
 python main.py
+```
 
 ## 环境要求
 - Windows 10/11（建议1903+）
