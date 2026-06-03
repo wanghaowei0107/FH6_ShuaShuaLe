@@ -7,7 +7,7 @@
 </p>
 
 <h1 align="center">
-  🏎️ 地平线6刷刷乐
+  🏎️ FH6_ShuaShuaLe
 </h1>
 
 <p align="center">
