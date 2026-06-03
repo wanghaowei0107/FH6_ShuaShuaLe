@@ -2,7 +2,7 @@
   <img src="https://img.shields.io/badge/Python-3.11+-blue.svg" alt="Python">
   <img src="https://img.shields.io/badge/PySide6-6.11.1-brightgreen.svg" alt="PySide6">
   <img src="https://img.shields.io/badge/OpenCV-4.13.0.92-blue.svg" alt="OpenCV">
-  <img src="https://img.shields.io/github/v/release/Prlock4367/FH6_ShuaShuaLe?color=red&label=version" alt="Version">
+  <img src="https://img.shields.io/badge/License-GPLv3-blue.svg" alt="License">
   <img src="https://img.shields.io/github/v/release/Prlock4367/FH6_ShuaShuaLe?color=red&label=version" alt="Version">
 </p>
 
