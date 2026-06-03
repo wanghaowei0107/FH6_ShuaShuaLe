@@ -3,12 +3,10 @@ from PySide6.QtCore import QTimer
 from qfluentwidgets import FluentWindow, FluentIcon, NavigationItemPosition
 from pages.skill_page import SkillPage
 from pages.wheelspin_page import WheelspinPage
-from pages.skill_page import SkillPage
-from pages.wheelspin_page import WheelspinPage
 from pages.auto_page import AutoPage
 from pages.loop_farm_page import LoopFarmPage
 from pages.settings_page import SettingsPage
-
+from pages.telemetry_page import TelemetryPage   # 新增导入
 
 class MainWindow(FluentWindow):
     def __init__(self, app):
@@ -27,6 +25,7 @@ class MainWindow(FluentWindow):
         self.register_page("wheelspin", "刷超级抽奖", WheelspinPage(app), FluentIcon.GAME)
         self.register_page("loop", "综合循环刷", LoopFarmPage(app), FluentIcon.SYNC)
         self.register_page("auto", "自动驾驶", AutoPage(app), FluentIcon.PLAY)
+        self.register_page("telemetry", "遥测数据", TelemetryPage(app), FluentIcon.SPEED_HIGH)# 新增
         self.register_page("settings", "设置", SettingsPage(app), FluentIcon.SETTING,
                            position=NavigationItemPosition.BOTTOM)
 
@@ -52,7 +51,7 @@ class MainWindow(FluentWindow):
         # 定时刷新
         self.timer = QTimer()
         self.timer.timeout.connect(self.refresh_all_progress)
-        self.timer.start(200)
+        self.timer.start(1000)
 
     def register_page(self, key, name, page, icon, position=NavigationItemPosition.TOP):
         self.pages[key] = page

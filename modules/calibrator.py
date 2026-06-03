@@ -29,22 +29,29 @@ current_hwnd = None
 
 def load_offsets():
     config = configparser.ConfigParser()
-    config.read(SETTINGS_FILE)
+    try:
+        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+            config.read_file(f)
+    except FileNotFoundError:
+        pass
     ox = config.getint("Capture", "offset_x", fallback=0)
     oy = config.getint("Capture", "offset_y", fallback=0)
     return ox, oy
 
 def save_offsets(ox, oy):
     config = configparser.ConfigParser()
-    config.read(SETTINGS_FILE)
+    try:
+        with open(SETTINGS_FILE, 'r', encoding='utf-8') as f:
+            config.read_file(f)
+    except FileNotFoundError:
+        pass
     if "Capture" not in config:
         config.add_section("Capture")
     config.set("Capture", "offset_x", str(ox))
     config.set("Capture", "offset_y", str(oy))
     os.makedirs(os.path.dirname(SETTINGS_FILE), exist_ok=True)
-    with open(SETTINGS_FILE, "w") as f:
+    with open(SETTINGS_FILE, 'w', encoding='utf-8') as f:
         config.write(f)
-
 def get_client_offset(hwnd):
     win_rect = win32gui.GetWindowRect(hwnd)
     client_rect = win32gui.GetClientRect(hwnd)
@@ -131,7 +138,7 @@ def start_capture(hwnd):
     return windows_capture.WindowsCapture(
         window_hwnd=hwnd,
         cursor_capture=False,
-        draw_border=False,
+        draw_border=True,
     )
 
 def create_frame_handler(hwnd):
@@ -187,22 +194,26 @@ def create_frame_handler(hwnd):
                 adj_y += 1
                 print(f"偏移: X={adj_x}, Y={adj_y}")
 
-            with _lock:
-                if command_flags["save_screenshot"]:
-                    os.makedirs(SAVE_DIR, exist_ok=True)
-                    filename = os.path.join(SAVE_DIR, f"calib_{save_count:03d}.png")
-                    cv2.imwrite(filename, client_img)
+            # 处理截图请求
+            if command_flags["save_screenshot"]:
+                os.makedirs(SAVE_DIR, exist_ok=True)
+                filename = os.path.join(SAVE_DIR, f"calib_{save_count:03d}.png")
+                success = cv2.imwrite(filename, client_img)
+                if success:
                     print(f"截图已保存: {filename}")
-                    save_count += 1
-                    command_flags["save_screenshot"] = False
+                else:
+                    print(f"截图保存失败: {filename}")
+                save_count += 1
+                command_flags["save_screenshot"] = False
 
-                if command_flags["save_and_exit"]:
-                    save_offsets(adj_x, adj_y)
-                    print(f"偏移已保存: X={adj_x}, Y={adj_y}")
-                    command_flags["save_and_exit"] = False
-                    command_flags["running"] = False
-                    ctrl.stop()
-                    return
+            # 处理退出请求（独立，不依赖截图）
+            if command_flags["save_and_exit"]:
+                save_offsets(adj_x, adj_y)
+                print(f"偏移已保存: X={adj_x}, Y={adj_y}")
+                command_flags["save_and_exit"] = False
+                command_flags["running"] = False
+                ctrl.stop()
+                return
 
             if cv2.getWindowProperty("Calibration", cv2.WND_PROP_VISIBLE) < 1:
                 command_flags["running"] = False

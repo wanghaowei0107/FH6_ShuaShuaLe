@@ -17,6 +17,8 @@ VK = {
     'backspace': 0x08,
     'shift': 0x10,
     'space': 0x20,
+    'c': 0x43,   # 添加
+    '2': 0x32,   # 添加
 }
 
 def send_key(hwnd, key, keydown):

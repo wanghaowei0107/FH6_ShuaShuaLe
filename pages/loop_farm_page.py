@@ -1,17 +1,17 @@
 import time
 import threading
-from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, QTimer
+from core.worker import BaseWorker
 from PySide6.QtWidgets import (
     QVBoxLayout, QHBoxLayout, QLabel, QWidget, QSizePolicy,
-    QScrollArea, QFrame, QPushButton, QGridLayout, QMessageBox
+    QFrame, QPushButton, QMessageBox, QGridLayout
 )
 from qfluentwidgets import (
     LineEdit, BodyLabel, StrongBodyLabel,
     SwitchButton, InfoBar, InfoBarPosition
 )
 from .base_page import BasePage
-from modules import loop_farm
-
 
 class StepCard(QFrame):
     """单个流程步骤卡片（配置用）"""
@@ -29,6 +29,7 @@ class StepCard(QFrame):
                 border-radius: 12px;
             }
         """)
+        self.setMinimumWidth(180)
         self.setMinimumWidth(180)
         self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
@@ -93,7 +94,6 @@ class StepCard(QFrame):
     def update_progress(self, done, total):
         self.progress_label.setText(f"已完成: {done}/{total}")
 
-
 class LoopFarmPage(BasePage):
     _step_highlight = Signal(str)
     _loop_finished = Signal()
@@ -101,10 +101,9 @@ class LoopFarmPage(BasePage):
     def __init__(self, app, parent=None):
         super().__init__(app, parent)
         self.app = app
-        self._loop_thread = None
         self.initUI()
         self._step_highlight.connect(self.set_current_step)
-        self._loop_finished.connect(self._on_real_loop_finished)
+        self._loop_finished.connect(self._on_loop_finished)
 
     def initUI(self):
         main_layout = QVBoxLayout(self)
@@ -114,7 +113,6 @@ class LoopFarmPage(BasePage):
         self.step_cards = {}
         self.card_order = ["nav", "skill", "return", "wheelspin", "delete_car"]
 
-        # ★ 修正 card_defs 结构，去掉多余的参数，统一使用 delete_car
         card_defs = [
             ("nav", "导航至蓝图", [("通用延迟", "200", "ms")], None, True),
             ("skill", "刷技术点", [
@@ -122,7 +120,10 @@ class LoopFarmPage(BasePage):
                 ("循环次数", "99", ""),
                 ("按住W时间", "32", "秒")
             ], "skill", True),
-            ("return", "返回居所", [("通用延迟", "200", "ms")], None, True),
+            ("return", "返回居所", [
+                ("通用延迟", "200", "ms"),
+                ("回家加载", "2.0", "秒")
+            ], None, True),
             ("wheelspin", "刷超级抽奖", [
                 ("通用延迟", "200", "ms"),
                 ("循环次数", "30", "")
@@ -181,7 +182,7 @@ class LoopFarmPage(BasePage):
         outer_layout.addWidget(center_widget)
         main_layout.addWidget(outer_card, stretch=0)
 
-        # ---------- 状态面板 ----------
+        # 状态面板
         self.status_panel = QFrame()
         self.status_panel.setObjectName("statusPanel")
         self.status_panel.setStyleSheet("""
@@ -205,7 +206,7 @@ class LoopFarmPage(BasePage):
 
         self._rebuild_status_panel()
 
-        # ---------- 底部控制 ----------
+        # 底部控制
         status_row = QHBoxLayout()
         self.status_label = BodyLabel("就绪")
         self.status_label.setStyleSheet("color: #0078d4; font-size: 14px;")
@@ -308,7 +309,6 @@ class LoopFarmPage(BasePage):
 
     def _on_cycle_toggle(self, checked):
         if checked:
-            # 删除车辆警告弹窗
             if self.step_cards["delete_car"].is_enabled():
                 reply = QMessageBox.warning(
                     self, "⚠ 危险操作确认",
@@ -326,148 +326,16 @@ class LoopFarmPage(BasePage):
                 self.cycle_switch.setChecked(False)
                 return
             self._rebuild_status_panel()
-            self._start_real_loop()
+            self.app.start("loop")
         else:
-            self._stop_real_loop()
+            self.app.stop()
 
-    def _start_real_loop(self):
-        if self._loop_thread and self._loop_thread.is_alive():
-            return
-
-        import core.window as win
-        hwnd = win.find_window(self.app.GAME_WINDOW_TITLE)
-        if not hwnd:
-            InfoBar.error(self, "错误", "找不到游戏窗口，请先启动游戏并确保窗口标题为 'Forza Horizon 6'",
-                          position=InfoBarPosition.TOP)
-            self.cycle_switch.setChecked(False)
-            return
-        self.app.hwnd = hwnd
-        self.app.stop_event.clear()
-
-        skill_loops = self.step_cards["skill"].get_loops() if self.step_cards["skill"].is_enabled() else 0
-        wheelspin_loops = self.step_cards["wheelspin"].get_loops() if self.step_cards["wheelspin"].is_enabled() else 0
-        delete_loops = self.step_cards["delete_car"].get_loops() if self.step_cards["delete_car"].is_enabled() else 0
-        w_hold_time = 30
-        if "skill" in self.step_cards and "按住W时间" in self.step_cards["skill"].param_widgets:
-            try:
-                w_hold_time = int(self.step_cards["skill"].param_widgets["按住W时间"].text())
-            except ValueError:
-                pass
-
-        from core.progress import save_total
-        if skill_loops > 0:
-            save_total("SkillPoints", skill_loops)
-        if wheelspin_loops > 0:
-            save_total("SuperWheelspin", wheelspin_loops)
-        if delete_loops > 0:
-            save_total("DeleteCar", delete_loops)
-
-        try:
-            total_loops = int(self.total_loops_edit.text())
-        except ValueError:
-            total_loops = 1
-
-        self._loop_thread = threading.Thread(
-            target=self._run_real_loop,
-            args=(skill_loops, wheelspin_loops, delete_loops, w_hold_time, total_loops),
-            daemon=True
-        )
-        self._loop_thread.start()
-        self.set_status("循环运行中...")
-
-    def _run_real_loop(self, skill_loops, wheelspin_loops, delete_loops, w_hold_time, total_loops):
-        hwnd = self.app.hwnd
-        stop_event = self.app.stop_event
-
-        try:
-            for cycle in range(1, total_loops + 1):
-                if stop_event.is_set():
-                    break
-
-                from core.progress import save_completed
-                save_completed("SkillPoints", 0)
-                save_completed("SuperWheelspin", 0)
-                save_completed("DeleteCar", 0)
-                self.update_card_progress()
-
-                if self.step_cards["nav"].is_enabled():
-                    self.set_status(f"第{cycle}/{total_loops}轮 - 导航至蓝图")
-                    self._step_highlight.emit("导航至蓝图")
-                    from modules.loop_farm import step_navigate_to_skill
-                    if not step_navigate_to_skill(hwnd, stop_event):
-                        return
-
-                if self.step_cards["skill"].is_enabled():
-                    self.set_status(f"第{cycle}/{total_loops}轮 - 刷技术点")
-                    self._step_highlight.emit("刷技术点")
-                    from modules.loop_farm import step_do_skill_points
-                    base_delay = 0.2
-                    if "通用延迟" in self.step_cards["skill"].param_widgets:
-                        base_delay = int(self.step_cards["skill"].param_widgets["通用延迟"].text()) / 1000.0
-                    step_do_skill_points(hwnd, stop_event, skill_loops, w_hold_time, base_delay=base_delay)
-                    self.update_card_progress()
-
-                if self.step_cards["return"].is_enabled():
-                    self.set_status(f"第{cycle}/{total_loops}轮 - 返回居所")
-                    self._step_highlight.emit("返回居所")
-                    from modules.loop_farm import step_return_home_from_skill
-                    if not step_return_home_from_skill(hwnd, stop_event):
-                        return
-
-                if self.step_cards["wheelspin"].is_enabled():
-                    self.set_status(f"第{cycle}/{total_loops}轮 - 刷超级抽奖")
-                    self._step_highlight.emit("刷超级抽奖")
-                    from modules.loop_farm import step_do_wheelspin
-                    base_delay = 0.2
-                    if "通用延迟" in self.step_cards["wheelspin"].param_widgets:
-                        base_delay = int(self.step_cards["wheelspin"].param_widgets["通用延迟"].text()) / 1000.0
-                    step_do_wheelspin(hwnd, stop_event, wheelspin_loops, base_delay=base_delay)
-                    self.update_card_progress()
-
-                if self.step_cards["delete_car"].is_enabled():
-                    self.set_status(f"第{cycle}/{total_loops}轮 - 删除车辆")
-                    self._step_highlight.emit("删除车辆")
-                    from modules.loop_farm import step_delete_car
-                    base_delay = 0.2
-                    if "通用延迟" in self.step_cards["delete_car"].param_widgets:
-                        try:
-                            base_delay = int(self.step_cards["delete_car"].param_widgets["通用延迟"].text()) / 1000.0
-                        except:
-                            pass
-                    step_delete_car(hwnd, stop_event, delete_loops, base_delay=base_delay)
-                    self.update_card_progress()
-
-        except Exception as e:
-            print(f"循环异常: {e}")
-        finally:
-            self._loop_finished.emit()
-
-    def _stop_real_loop(self):
-        self.app.stop_event.set()
-        if self._loop_thread and self._loop_thread.is_alive():
-            self._loop_thread.join(timeout=1)
-        QTimer.singleShot(0, self._reset_ui)
-
-    def _reset_ui(self):
-        self.set_current_step(None)
-        self._rebuild_status_panel()
-        self.set_status("就绪")
-        if self.cycle_switch.isChecked():
-            self.cycle_switch.setChecked(False)
-        self.update_card_progress()
-
-    def _on_real_loop_finished(self):
+    def _on_loop_finished(self):
         self.cycle_switch.setChecked(False)
         self.set_status("循环结束")
 
     def set_status(self, text):
         self.status_label.setText(text)
-
-    def get_data(self):
-        return {}
-
-    def set_progress(self, skill_done, skill_total, wheel_done, wheel_total):
-        pass
 
     def update_card_progress(self):
         from core.progress import load_progress
@@ -480,3 +348,10 @@ class LoopFarmPage(BasePage):
         if "delete_car" in self.step_cards:
             t, d = load_progress("DeleteCar")
             self.step_cards["delete_car"].update_progress(d, t)
+
+    def get_data(self):
+        return {}
+
+    def set_progress(self, *args):
+        pass
+

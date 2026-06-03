@@ -18,7 +18,7 @@ class WheelspinPage(BasePage):
 
         card = CardWidget()
         card.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-        card.setMaximumWidth(500)
+        # 删除 setMaximumWidth(500)
         card_layout = QVBoxLayout(card)
         card_layout.setSpacing(8)
         card_layout.setContentsMargins(16, 12, 16, 12)
@@ -26,24 +26,28 @@ class WheelspinPage(BasePage):
         # 通用延迟
         card_layout.addWidget(BodyLabel("通用延迟(ms)"))
         self.base_delay_edit = LineEdit()
+        self.base_delay_edit.setFixedWidth(120)
         self.base_delay_edit.setText("200")
         card_layout.addWidget(self.base_delay_edit)
 
         # 循环次数
         card_layout.addWidget(BodyLabel("循环次数"))
         self.loops_edit = LineEdit()
+        self.loops_edit.setFixedWidth(120)
         self.loops_edit.setText("30")
         card_layout.addWidget(self.loops_edit)
 
-        # 买车前等待（始终可见）
+        # 买车前等待
         card_layout.addWidget(BodyLabel("买车前等待(秒)"))
         self.buy_wait_edit = LineEdit()
+        self.buy_wait_edit.setFixedWidth(120)
         self.buy_wait_edit.setText("5")
         card_layout.addWidget(self.buy_wait_edit)
 
-        # 买车后加载（始终可见）
+        # 买车后加载
         card_layout.addWidget(BodyLabel("买车后加载(秒)"))
         self.load_wait_edit = LineEdit()
+        self.load_wait_edit.setFixedWidth(120)
         self.load_wait_edit.setText("15")
         card_layout.addWidget(self.load_wait_edit)
 
@@ -56,7 +60,7 @@ class WheelspinPage(BasePage):
         switch_row.addStretch()
         card_layout.addLayout(switch_row)
 
-        # 进度（蓝色小字）
+        # 进度
         self.progress_label = BodyLabel("已完成: 0 / 0")
         self.progress_label.setStyleSheet("color: #0078d4; font-size: 13px;")
         card_layout.addWidget(self.progress_label)
@@ -87,7 +91,7 @@ class WheelspinPage(BasePage):
             "use_images": self.use_images_switch.isChecked(),
             "buy_wait": int(self.buy_wait_edit.text()),
             "load_wait": int(self.load_wait_edit.text()),
-            "base_delay": int(self.base_delay_edit.text()) / 1000.0  # ← 转换成秒
+            "base_delay": int(self.base_delay_edit.text()) / 1000.0
         }
 
     def set_progress(self, done, total):
