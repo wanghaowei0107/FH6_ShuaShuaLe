@@ -6,9 +6,12 @@
   <img src="https://img.shields.io/badge/version-0.4.2-red.svg" alt="Version">
 </p>
 
-<h3 align="center">FH6_ShuaShuaLe地平线6刷刷乐-地平线6自动化辅助工具</h3>
+<h1 align="center">
+  🏎️ 地平线6刷刷乐
+</h1>
 
 <p align="center">
+  <strong>《极限竞速：地平线 6》自动化辅助工具</strong><br>
   刷技术点 · 超级抽奖 · 综合循环刷 · 送外卖 · 刷劲敌 · 线上挂机 · 遥测监控
 </p>
 
