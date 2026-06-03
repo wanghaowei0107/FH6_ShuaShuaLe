@@ -50,9 +50,9 @@ pip install -r requirements.txt
 python main.py
 
 ## 环境要求
-Windows 10/11（建议1903+）
-《极限竞速：地平线 6》已运行，窗口标题 Forza Horizon 6
-游戏键位默认，关闭“下一站”
+- Windows 10/11（建议1903+）
+-《极限竞速：地平线 6》已运行，窗口标题 Forza Horizon 6
+- 游戏键位默认，关闭“下一站”
 
 ## ❓ 常见问题
 找不到窗口：管理员运行，检查游戏标题
