@@ -72,7 +72,7 @@ python main.py
 如果这个工具帮到了你，可以请作者喝杯咖啡，完全自愿～  
 赞助全部用于项目维护，也是我更新的小动力。
 
-👉 [前往爱发电支持 Prlock](https://afdian.com/a/Prlock)
+👉 [前往爱发电支持 Prlock]((https://ifdian.net/a/Prlock))
 
 ## 📞 反馈
 
