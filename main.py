@@ -76,6 +76,7 @@ class App:
         QMessageBox.warning(self.ui, "提示", msg)
 
     def show_error(self, msg):
+        logger.error(msg)
         QMessageBox.critical(self.ui, "错误", msg)
 
     def set_buttons_state(self, module, running):
@@ -208,6 +209,7 @@ class App:
             self.wheelspin_qthread.finished.connect(self.wheelspin_qthread.deleteLater)
             self.wheelspin_worker.finished.connect(self._on_worker_finished)
             self.wheelspin_worker.status.connect(self.set_status)
+            self.wheelspin_worker.error.connect(self.show_error)
             self.wheelspin_worker.progress.connect(self._on_wheelspin_progress)
 
             self.thread = self.wheelspin_qthread

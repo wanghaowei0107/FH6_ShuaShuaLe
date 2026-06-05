@@ -28,6 +28,7 @@ _print_lock = threading.Lock()
 
 # ---------- 模板缓存（避免重复读盘）----------
 _TEMPLATE_CACHE = {}
+_SCALED_TEMPLATE_CACHE = {}
 
 def debug_log(msg):
     if DEBUG:
@@ -137,13 +138,40 @@ def match_template(screenshot, template_path, threshold=0.8):
             print("[错误] 模板尺寸大于截图，无法匹配")
         return None, 0.0
 
-    res = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
-    _, max_val, _, max_loc = cv2.minMaxLoc(res)
+    best_val = -1.0
+    best_loc = None
+    best_shape = template.shape[:2]
 
-    if max_val >= threshold:
-        h, w = template.shape[:2]
-        return (max_loc[0] + w // 2, max_loc[1] + h // 2), max_val
-    return None, max_val
+    for scale in (1.0, 0.7, 0.75, 0.8, 0.9, 1.1, 1.2, 1.25, 1.3, 1.4, 1.5):
+        if scale == 1.0:
+            candidate = template
+        else:
+            cache_key = (template_path, scale)
+            if cache_key not in _SCALED_TEMPLATE_CACHE:
+                _SCALED_TEMPLATE_CACHE[cache_key] = cv2.resize(
+                    template,
+                    (
+                        max(1, int(template.shape[1] * scale)),
+                        max(1, int(template.shape[0] * scale)),
+                    ),
+                    interpolation=cv2.INTER_LINEAR,
+                )
+            candidate = _SCALED_TEMPLATE_CACHE[cache_key]
+
+        if candidate.shape[0] > screenshot.shape[0] or candidate.shape[1] > screenshot.shape[1]:
+            continue
+
+        res = cv2.matchTemplate(screenshot, candidate, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, max_loc = cv2.minMaxLoc(res)
+        if max_val > best_val:
+            best_val = max_val
+            best_loc = max_loc
+            best_shape = candidate.shape[:2]
+
+    if best_val >= threshold and best_loc is not None:
+        h, w = best_shape
+        return (best_loc[0] + w // 2, best_loc[1] + h // 2), best_val
+    return None, best_val
 
 # ---------- 循环等待特定图像（动态刷新，带锁） ----------
 def wait_for_image(hwnd, template_name, timeout=10, check_interval=0.5, threshold=0.8, stop_event=None, silent=False):

@@ -117,9 +117,8 @@ def _step_return_home_from_skill(hwnd, stop_event, base_delay=0.2, home_load_del
     if stoppable.sleep(home_load_delay): return False
     if not wait_for_image(hwnd, "home_confirm.png", timeout=5, stop_event=stop_event):
         return False
-    for _ in range(2):
-        press(hwnd, 'pgdn')
-        if stoppable.sleep(0.1 + base_delay): return False
+    press(hwnd, 'pgdn')
+    if stoppable.sleep(0.1 + base_delay): return False
     return True
 
 

@@ -122,10 +122,10 @@ class LoopFarmPage(BasePage):
             ], "skill", True),
             ("return", "返回居所", [
                 ("通用延迟", "200", "ms"),
-                ("回家加载", "2.0", "秒")
+                ("回家加载", "15.0", "秒")
             ], None, True),
             ("wheelspin", "刷超级抽奖", [
-                ("通用延迟", "200", "ms"),
+                ("通用延迟", "300", "ms"),
                 ("循环次数", "30", "")
             ], "wheelspin", True),
             ("delete_car", "删除车辆", [("通用延迟", "200", "ms"), ("循环次数", "30", "")], "delete_car", True),
