@@ -13,6 +13,7 @@ permissions:
 env:
   APP_NAME: FH6_ShuaShuaLe
   PYTHON_VERSION: "3.11"
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
 jobs:
   build-windows:
